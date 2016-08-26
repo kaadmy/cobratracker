@@ -1,0 +1,175 @@
+#!/usr/bin/env python2
+
+# Copyright (c) 2016 Void7, KaadmY
+
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# import modules
+
+import sys
+import os
+import ConfigParser
+import struct
+import wave
+
+# constants
+
+SAMPLEPATH = "samples"
+
+# get arguments
+
+if len(sys.argv) < 3:
+    print "usage: cobratracker <input .ctr> <output .wav>"
+    quit(1)
+
+inputfile = sys.argv[1]
+outputfile = sys.argv[2]
+
+# load music
+
+music = ConfigParser.ConfigParser()
+music.read(inputfile)
+
+musicdef = {
+    "patterns": [],
+    "bpm": 128,
+    "rate": 44100,
+    }
+samples = {}
+patterns = {}
+
+for section in music.sections():
+    if section == "music":
+        try:
+            musicdef["patterns"] = music.get(section, "patterns").split(" ")
+        except:
+            print "no samples defined"
+            quit(1)
+
+        try:
+            musicdef["bpm"] = music.getint(section, "bpm")
+        except:
+            print "bpm not defined"
+            quit(1)
+
+        try:
+            musicdef["rate"] = music.getint(section, "rate")
+        except:
+            print "rate not defined"
+            quit(1)
+    
+        print "rate: " + str(musicdef["rate"])
+        print "bpm: " + str(musicdef["bpm"])
+    elif section == "samples":
+        for opt in music.options(section):
+
+            name = music.get(section, opt)
+
+            print "loading sample '" + os.path.join(SAMPLEPATH, name) + "'"
+    
+            try:
+                sample = wave.open(os.path.join(SAMPLEPATH, name), "r")
+
+                num = sample.getnframes()
+                samples[opt] = struct.unpack("%dh" % num, sample.readframes(num))
+
+                sample.close()
+            except:
+                print "failed loading sample '" + os.path.join(SAMPLEPATH, name) + "'"
+    
+                samples[opt] = []
+    elif section.startswith("pattern."):
+        pattern = {}
+
+        for opt in music.options(section):
+            pattern[opt] = music.get(section, opt).replace(" ", "")
+
+            patterns[section.split(".", 1)[1]] = pattern
+
+# variables
+
+# compine samples
+
+length = 10
+
+values = []
+
+warnings = {
+    "nosample": {},
+    "nopattern": {},
+    }
+
+def add_sample(time, name):
+    global values
+    try:
+        frames = samples[name]
+    except:
+        if name not in warnings["nosample"]:
+            warnings["nosample"][name] = True
+            print "no such sample '" + name + "'"
+        frames = []
+    if len(values) < time + len(frames):
+        values += [0] * ((time + len(frames)) - len(values))
+    for i in range(len(frames)):
+        values[time + i] += frames[i]
+
+time = 0
+
+framesperbeat = (musicdef["rate"] * 60) / musicdef["bpm"]
+
+def add_pattern(name, time):
+    try:
+        pattern = patterns[name]
+    except:
+        if name not in warnings["nopattern"]:
+            warnings["nopattern"][name] = True
+            print "no such pattern '" + name + "'"
+
+        return 0
+
+    if len(pattern) < 1:
+        print "no samples defined in pattern '" + name + "'"
+        return 0
+
+    length = len(pattern.values()[0]) * framesperbeat
+
+    for track in pattern:
+        tracktime = 0
+        for sample in pattern[track]:
+            if sample == "#":
+                add_sample(time + tracktime, track)
+            tracktime += framesperbeat
+    return length
+
+# get music track length
+
+for pattern in musicdef["patterns"]:
+    time += add_pattern(pattern, time)
+
+# write to output file
+
+value_str = "".join([struct.pack("h", min(32767, max(v, -32768))) for v in values])
+
+output = wave.open(outputfile, "w")
+
+output.setparams((1, 2, musicdef["rate"], 0, "NONE", "not compressed"))
+output.writeframes(value_str)
+
+output.close()

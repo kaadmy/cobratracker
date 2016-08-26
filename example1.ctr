@@ -1,0 +1,45 @@
+[music]
+patterns = start a b c d e b c d e a b c c d e e a d b c c d e e a b c c d e a b c d e b end
+bpm = 240
+rate = 44100
+
+[samples]
+pulse4 = sfxr/pulse4.wav
+pulse5 = sfxr/pulse5.wav
+shoot1 = sfxr/shoot1.wav
+warp1 = sfxr/warp1.wav
+bump1 = sfxr/bump1.wav
+blip1 = sfxr/blip1.wav
+blip2 = sfxr/blip2.wav
+powerup2 = sfxr/powerup2.wav
+powerdown2 = sfxr/powerdown2.wav
+
+[pattern.start]
+pulse4 = -#-- -#-- -#--
+bump1  = #--- #--- #-##
+
+[pattern.a]
+bump1  = -#-# --#- -##-
+shoot1 = #### -##- -##-
+
+[pattern.b]
+bump1  = -#-- -#-- -##-
+shoot1 = #-#- #-#- -###
+
+[pattern.c]
+bump1  = ---- -#-- ----
+shoot1 = -##- #### ----
+
+[pattern.d]
+shoot1   = -#-# -##- ##-# ##-# ##
+warp1    = ---- ---- #-## -### ##
+powerup2 = #-#- #-#- ---- ---- --
+
+[pattern.e]
+powerdown2 = -#-- --#- ----
+warp1      = -##- -##- ----
+shoot1     = -##- #--- -##-
+
+[pattern.end]
+powerdown2 = #--- -#-- #---
+bump1      = ###- #-## ##--
