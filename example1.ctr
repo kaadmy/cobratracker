@@ -4,6 +4,9 @@ bpm = 240
 rate = 44100
 
 [samples]
+pluck1 = sfxr/pluck1.wav
+throb1 = sfxr/throb1.wav
+hum1 = sfxr/hum1.wav
 pulse4 = sfxr/pulse4.wav
 pulse5 = sfxr/pulse5.wav
 shoot1 = sfxr/shoot1.wav
@@ -17,18 +20,23 @@ powerdown2 = sfxr/powerdown2.wav
 [pattern.start]
 pulse4 = -#-- -#-- -#--
 bump1  = #--- #--- #-##
+hum1   = #-#- -#-- -##-
+throb1 = -#-- --#- ---#
 
 [pattern.a]
 bump1  = -#-# --#- -##-
 shoot1 = #### -##- -##-
+hum1   = ##-- #-## --##
+pluck1 = -##- -##- ###-
 
 [pattern.b]
 bump1  = -#-- -#-- -##-
 shoot1 = #-#- #-#- -###
 
 [pattern.c]
-bump1  = ---- -#-- ----
-shoot1 = -##- #### ----
+bump1  = ---- -#-- -##-
+shoot1 = -##- #### ---#
+throb1 = #-#- --## ##-#
 
 [pattern.d]
 shoot1   = -#-# -##- ##-# ##-# ##
@@ -39,6 +47,7 @@ powerup2 = #-#- #-#- ---- ---- --
 powerdown2 = -#-- --#- ----
 warp1      = -##- -##- ----
 shoot1     = -##- #--- -##-
+pluck1     = #-#- ##-# ##--
 
 [pattern.end]
 powerdown2 = #--- -#-- #---
