@@ -2,7 +2,7 @@
 # CobraTracker
 [Github](https://github.com/kaadmy/cobratracker)
 
-A mininal music tracker written in Python
+A minimal music tracker written in Python
 
 ## License
 
